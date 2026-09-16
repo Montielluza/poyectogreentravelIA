@@ -18,16 +18,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. Deshabilitar CSRF para H2 y APIs
                 .csrf(csrf -> csrf.disable())
+
+                // 2. Permitir acceso libre a la consola H2 y a Swagger
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
+                )
+
+                // 3. Permitir los frames para poder ver la interfaz de H2
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
                 );
+
         return http.build();
     }
 }
